@@ -72,23 +72,21 @@ async function executeTool(name: string, input: any) {
             case "web_fetcher":
                 console.log(`\n🌐 [Đang tải dữ liệu thực tế từ: ${input.url} ...]`);
 
-                // 1. Tải toàn bộ mã HTML của trang web
+                // Tải toàn bộ mã HTML của trang web
                 const response = await fetch(input.url);
                 if (!response.ok) {
                     throw new Error(`Không thể truy cập trang web. Mã lỗi HTTP: ${response.status}`);
                 }
                 const html = await response.text();
 
-                // 2. Dùng cheerio để phân tích mã HTML
+                // Dùng cheerio để phân tích mã HTML
                 const $ = cheerio.load(html);
 
-                // 3. Xóa bỏ các phần tử gây nhiễu, không chứa nội dung có ích
                 $('script, style, noscript, iframe, img, svg, nav, footer').remove();
 
-                // 4. Lấy toàn bộ chữ (text) còn lại trong thẻ <body> và dọn dẹp khoảng trắng thừa
                 const cleanText = $('body').text().replace(/\s+/g, ' ').trim();
 
-                // 5. Cắt bớt nội dung nếu quá dài (Tránh tràn bộ nhớ AI, ở đây lấy 15.000 ký tự đầu)
+                // Cắt bớt nội dung nếu quá dài (Tránh tràn bộ nhớ AI, lấy 15.000 ký tự đầu)
                 const finalText = cleanText.substring(0, 15000);
 
                 if (!finalText) {
@@ -113,7 +111,7 @@ async function chat(userInput: string) {
         console.log(`\n👨‍💻 Bạn: ${userInput}`);
     }
 
-    console.log("🤖 Agent đang suy nghĩ...\n");
+    console.log(" Agent đang suy nghĩ...\n");
 
     // Gửi request kèm Streaming và danh sách Tools
     const stream = client.messages.stream({
@@ -132,7 +130,7 @@ async function chat(userInput: string) {
     stream.on('contentBlock', (contentBlock) => {
         if (contentBlock.type === 'tool_use') {
             toolCall = contentBlock;
-            console.log(`\n\n⚙️  [Hệ thống: AI đang kích hoạt công cụ '${contentBlock.name}'...]`);
+            console.log(`\n\n  [Hệ thống: AI đang kích hoạt công cụ '${contentBlock.name}'...]`);
         }
     });
 
@@ -166,7 +164,7 @@ async function chat(userInput: string) {
 // 7. Hàm giả lập người dùng hỏi Multi-turn
 async function runDemo() {
     await chat("Chào bạn, tôi đang có một phép tính khó: 255 chia cho 5 bằng bao nhiêu?");
-    await chat("Tuyệt vời! Bây giờ hãy dùng khả năng đọc hệ thống của bạn để đọc file 'sample.txt' nhé.");
+    await chat("Bây giờ hãy dùng khả năng đọc hệ thống của bạn để đọc file 'sample.txt' nhé.");
     await chat("Bạn còn nhớ đáp án ở phép tính bạn vừa làm ban đầu không?")
     await chat("hãy vào trang web https://make-everything-ok.com/ và tóm tắt nội dung chính của trang này cho tôi")
 }
